@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a09">
+<title>the gauntlet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#0a0a09; --ink:#f2ede2; --dim:#8a8578; --amber:#d9a441; --red:#c4483a; --line:#26241f; }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{ background:var(--bg); color:var(--ink); font-family:'Cormorant Garamond',Georgia,serif;
+    display:flex; align-items:center; justify-content:center; min-height:100dvh; padding:18px; }
+  #app{width:100%; max-width:560px;}
+  .center{text-align:center;}
+  h1{font-weight:400; letter-spacing:.35em; text-transform:lowercase; font-size:clamp(26px,7vw,40px);}
+  h2{font-weight:400; font-size:clamp(20px,5.5vw,28px); letter-spacing:.04em;}
+  .kicker{color:var(--dim); font-size:12px; letter-spacing:.3em; text-transform:uppercase; margin-bottom:14px;}
+  .sub{color:var(--dim); font-size:15px; line-height:1.65; margin-top:18px;}
+  .amber{color:var(--amber);}
+  button{ font-family:inherit; cursor:pointer; background:none; border:1px solid var(--line);
+    color:var(--ink); font-size:16px; padding:14px 18px; border-radius:2px;
+    transition:border-color .2s, background .2s, transform .1s; }
+  button:hover{border-color:var(--amber);}
+  button:active{transform:scale(.98);}
+  .btn-main{border-color:var(--amber); color:var(--amber); letter-spacing:.15em; margin-top:28px; padding:16px 34px;}
+  .btn-ghost{color:var(--dim); font-size:13px; border:none; text-decoration:underline; text-underline-offset:4px; margin-top:16px;}
+  .fade{animation:fadein .5s ease both;}
+  @keyframes fadein{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+  .hps{display:flex; justify-content:space-between; gap:14px; margin:22px 0 8px; font-size:12px; letter-spacing:.15em; color:var(--dim);}
+  .bar{height:3px; background:var(--line); border-radius:2px; overflow:hidden; margin-top:6px;}
+  .bar > div{height:100%; transition:width .5s ease;}
+  #you-fill{background:var(--ink); width:100%;}
+  #foe-fill{background:var(--amber); width:100%;}
+  .claim{ margin:26px 0 10px; font-size:clamp(19px,5vw,24px); line-height:1.5; min-height:96px; }
+  .claim .who{display:block; font-size:12px; letter-spacing:.3em; color:var(--amber); text-transform:uppercase; margin-bottom:12px;}
+  .opts{display:flex; flex-direction:column; gap:10px; margin-top:24px;}
+  .opt{text-align:left; font-size:15.5px; line-height:1.5; padding:15px 16px;}
+  .opt .tag{color:var(--dim); font-size:11px; letter-spacing:.2em; text-transform:uppercase; display:block; margin-bottom:5px;}
+  .opt.right{border-color:var(--amber); background:rgba(217,164,65,.08);}
+  .opt.wrong{border-color:var(--red); background:rgba(196,72,58,.08);}
+  .opt:disabled{cursor:default;}
+  .why{ margin-top:20px; padding:16px; border-left:2px solid var(--amber); color:var(--dim);
+    font-size:14.5px; line-height:1.6; display:none; }
+  .why.show{display:block; animation:fadein .4s ease both;}
+  .next-row{margin-top:22px; text-align:right; min-height:50px;}
+  .shake{animation:shake .4s ease;}
+  @keyframes shake{0%,100%{transform:none}25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+  .era-num{font-size:12px; letter-spacing:.4em; color:var(--amber); margin-bottom:16px;}
+  .era-body{color:var(--dim); font-size:15.5px; line-height:1.7; margin-top:18px;}
+  .stages{display:flex; flex-direction:column; gap:8px; margin-top:24px; max-height:55dvh; overflow-y:auto;}
+  .stage-btn{display:flex; justify-content:space-between; align-items:center; text-align:left; font-size:15px; padding:13px 16px;}
+  .stage-btn .st{font-size:11px; letter-spacing:.2em; color:var(--dim);}
+  .stage-btn.locked{opacity:.35; cursor:not-allowed;}
+  .stage-btn.locked:hover{border-color:var(--line);}
+  .grim{max-height:60dvh; overflow-y:auto; margin-top:20px; text-align:left;}
+  .grim h3{font-weight:400; color:var(--amber); font-size:14px; letter-spacing:.2em; text-transform:uppercase; margin:22px 0 8px;}
+  .grim p{font-size:14.5px; line-height:1.65; color:var(--dim); margin-bottom:10px;}
+  .grim p b{color:var(--ink); font-weight:400;}
+  .footnote{margin-top:36px; color:var(--dim); font-size:12px; letter-spacing:.1em;}
+  .topbar{display:flex; justify-content:space-between; align-items:center; font-size:11px; letter-spacing:.25em; color:var(--dim); text-transform:uppercase;}
+  .topbar button{border:none; color:var(--dim); font-size:11px; letter-spacing:.25em; padding:6px 0; text-transform:uppercase;}
+  .topbar button:hover{color:var(--amber);}
+  .score-line{margin-top:10px; font-size:13px; color:var(--dim); letter-spacing:.15em;}
+  .books{margin-top:26px; text-align:left;}
+  .books p{font-size:14.5px; color:var(--dim); line-height:1.7; margin-bottom:8px;}
+  .books p b{color:var(--ink); font-weight:400;}
+
+  /* ---- design polish ---- */
+  h1{letter-spacing:.18em;}
+  .kicker{font-family:'Space Mono',monospace;letter-spacing:.24em;}
+  button{letter-spacing:.12em;}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+const STAGES = [
+{ num:"i", era:"the pre-socratics", years:"~600-450 bc",
+  intro:"greek guys on the coast of turkey and italy do something nobody had done: explain the world without gods. the answers are wild and mostly wrong, but the move is everything - nature has a logic and you can find it by thinking.",
+  rounds:[
+    { who:"thales", claim:"everything is water. the first theory of everything.",
+      opts:[["democritus","everything is atoms - tiny indivisible bits moving in empty space.",1],
+            ["parmenides","everything is one and change is an illusion.",0],
+            ["pythagoras","everything is number.",0]],
+      why:"democritus guessed the answer 2,000 years before the equipment existed to check it."},
+    { who:"heraclitus", claim:"everything is change. you never step in the same river twice.",
+      opts:[["parmenides","change is an illusion - something can't come from nothing, so nothing real ever changes.",1],
+            ["thales","sure, but it's still all water underneath.",0],
+            ["democritus","change is just atoms doing little dances.",0]],
+      why:"the exact opposite, argued with pure logic. this fight - change vs. permanence - runs through the next 2,500 years."},
+    { who:"pythagoras", claim:"everything is number. math isn't a tool for describing the world - it's what the world is made of.",
+      opts:[["the dunk","every physicist alive is his descendant. this one mostly survives.",1],
+            ["heraclitus","numbers never sit still either. fire beats math.",0],
+            ["democritus","atoms don't care about your triangles.",0]],
+      why:"some claims don't get dunked, they get inherited."}
+  ]},
+{ num:"ii", era:"athens", years:"~450-320 bc",
+  intro:"athens gets rich and confident, and philosophy moves from 'what is stuff' to 'what are we doing.'",
+  rounds:[
+    { who:"socrates", claim:"the unexamined life is not worth living.",
+      opts:[["the move","walk into the market, ask anyone who claims to be wise to define justice, courage, piety - and watch them fail.",1],
+            ["the counter","write a long book proving him wrong, point by point.",0],
+            ["the dodge","agree, then change the subject to olives.",0]],
+      why:"he wrote nothing and the city executed him for it in 399 bc. he refused to escape - he wouldn't break the laws he'd lived under. philosophy now has a martyr."},
+    { who:"plato", claim:"everything you see is shadows on a cave wall. your chair is a bad copy of the perfect chair in the realm of forms.",
+      opts:[["aristotle","forget the perfect world upstairs - study this one.",1],
+            ["the cave fan","true, and the shadows are pretty good actually.",0],
+            ["the skeptic","maybe there is no cave.",0]],
+      why:"plato's own student pushes back hardest. aristotle basically invents science: logic, physics, biology, politics, ethics."},
+    { who:"aristotle", claim:"virtue is a habit, and it lives at the mean between extremes.",
+      opts:[["the application","courage is the mean between cowardice and recklessness.",1],
+            ["the extreme","real virtue is always at the maximum.",0],
+            ["the shortcut","virtue is whatever you're born with.",0]],
+      why:"he also tutored alexander the great, which went about how you'd expect."}
+  ]},
+{ num:"iii", era:"philosophy as therapy", years:"~300 bc - 200 ad",
+  intro:"alexander's empire shatters and philosophy stops being about the cosmos - it becomes a survival kit. four schools, four answers to the same question: how do i stay calm?",
+  rounds:[
+    { who:"the epicureans", claim:"pleasure is the goal.",
+      opts:[["the real version","real pleasure is the absence of pain and anxiety. simple food, good friends, no politics, no fear of death.",1],
+            ["the cartoon","so party constantly. got it.",0],
+            ["the panic","pleasure is a trap - avoid all of it.",0]],
+      why:"the most misquoted school in history. when you're dead there's no you to mind, so stop fearing death."},
+    { who:"the stoics", claim:"you control your judgments, not the world.",
+      opts:[["the practice","sort everything into 'up to me' and 'not up to me' - and only sweat the first pile.",1],
+            ["the struggle","control the world harder. more effort.",0],
+            ["the numbness","feel nothing about anything, ever.",0]],
+      why:"the wild part is who believed it: epictetus was a slave, seneca advised nero, marcus aurelius ran the empire. same philosophy, every rung of the ladder."},
+    { who:"the cynics", claim:"conventions are fake and you can just ignore them.",
+      opts:[["diogenes","want nothing and nobody owns you. live in the wine jar. tell alexander to get out of your sunlight.",1],
+            ["the skeptics","every argument has an equal opposite, so just shrug forever.",0],
+            ["the stoics","ignore conventions, but keep a strict daily journaling habit.",0]],
+      why:"diogenes owned a cup until he saw a kid drink from his hands. the skeptics reach the same peace by shrugging instead of discarding."}
+  ]},
+{ num:"iv", era:"the east, in parallel", years:"~600 bc onward",
+  intro:"while greece argues about atoms, india and china run their own programs. less 'what is real,' more 'why does life hurt and how do we flow with it.'",
+  rounds:[
+    { who:"the buddha", claim:"life involves suffering. suffering comes from craving. stop the craving and you stop the suffering.",
+      opts:[["the radical move","there is no fixed self to protect - you're a process, not a thing.",1],
+            ["the hedge","keep the self, just feed it less.",0],
+            ["the denial","suffering is a mindset. simply don't have it.",0]],
+      why:"the eightfold path is the how. it's heraclitus with a practice attached."},
+    { who:"confucius", claim:"social chaos is a character problem. fix yourself, honor your family, take ritual seriously, and order spreads outward.",
+      opts:[["laozi","you can't fix the world by trying harder. wu wei - act by not forcing. water wears down stone.",1],
+            ["the legalist","chaos is a punishment problem. harsher laws.",0],
+            ["the optimist","chaos will fix itself if we wait.",0]],
+      why:"direct pushback: the tao is the way things flow when nobody's forcing them."},
+    { who:"zen", claim:"enlightenment isn't at the end of a long climb.",
+      opts:[["the twist","it's available right now - and straining for it is exactly what blocks it.",1],
+            ["the grind","it's available after exactly 10,000 hours.",0],
+            ["the deal","it's available to those who purchase the deluxe path.",0]],
+      why:"what happens when buddhism hits taoism a thousand years later."}
+  ]},
+{ num:"v", era:"god enters the chat", years:"~300-1400 ad",
+  intro:"rome converts, the western empire falls, and for a thousand years philosophy's job is making greek logic work inside revealed religion. three civilizations run the same project at once.",
+  rounds:[
+    { who:"augustine", claim:"evil isn't a thing - it's the absence of good, like darkness is the absence of light.",
+      opts:[["the synthesis","plato, married to christianity. also: the first real autobiography, and basically the invention of the inner life.",1],
+            ["the objection","evil feels pretty thing-shaped to me.",0],
+            ["the shrug","darkness is also a thing, checkmate.",0]],
+      why:"the project: make the ancient greek tools hold up inside a religion."},
+    { who:"avicenna", claim:"imagine yourself created mid-air, blindfolded, feeling nothing. you'd still know you exist.",
+      opts:[["the conclusion","so the self isn't the body.",1],
+            ["the conclusion","so floating is the natural state of man.",0],
+            ["the conclusion","so nothing can be known.",0]],
+      why:"the floating man. the islamic world's giant kept aristotle alive while europe lost the books."},
+    { who:"aquinas", claim:"faith and reason are two roads to one truth.",
+      opts:[["the payoff","so they can never really contradict each other. aristotle, married to christianity - the books came back from the islamic scholars.",1],
+            ["the worry","so reason must yield whenever faith speaks first.",0],
+            ["the split","so we keep them in separate rooms forever.",0]],
+      why:"his five proofs of god are still assigned in intro classes. maimonides ran the jewish version of the same project: reason to the edge, faith past it."}
+  ]},
+{ num:"vi", era:"the door gets kicked in", years:"~1600-1750",
+  intro:"the scientific revolution starts landing results and philosophy has to catch up. two teams form: reason vs. experience.",
+  rounds:[
+    { who:"descartes", claim:"doubt everything that can be doubted. what's left?",
+      opts:[["the bedrock","the fact that you're doubting. i think, therefore i am.",1],
+            ["the void","nothing. nothing is left.",0],
+            ["the senses","whatever my eyes tell me is solid.",0]],
+      why:"modern philosophy starts here. the side effect: a hard split between mind and body that we're still fighting about."},
+    { who:"locke", claim:"the mind starts as a blank slate - everything in it came in through the senses.",
+      opts:[["the empiricist arc","berkeley takes it further: to be is to be perceived. matter disappears; things stay real because god perceives them.",1],
+            ["the rationalist","no - the big truths are built in before birth.",0],
+            ["the spinozist","there's only one substance and it's everything.",0]],
+      why:"locke's other idea: government works only by consent of the governed. the american founders read him like scripture."},
+    { who:"hume", claim:"you never observe cause - only one thing after another.",
+      opts:[["the full send","causation is a habit of mind. the self is a bundle of perceptions. reason is the slave of the passions.",1],
+            ["the retreat","fine, but only on tuesdays.",0],
+            ["the fix","observe harder and causation shows up.",0]],
+      why:"hume is the end of the road for both teams. everyone since has been dealing with the wreckage."}
+  ]},
+{ num:"vii", era:"kant", years:"1780s",
+  intro:"kant says hume woke him from his dogmatic slumber. his answer rewires everything.",
+  rounds:[
+    { who:"kant", claim:"the mind doesn't just receive the world - it structures it.",
+      opts:[["the claim","space, time, and causation aren't out there. they're the glasses your mind wears and can't take off.",1],
+            ["the misread","the world is a hallucination and nothing exists.",0],
+            ["the misread","some minds structure better than others, so trust experts.",0]],
+      why:"you never touch things as they are in themselves. science works because every human mind runs the same operating system."},
+    { who:"kant", claim:"act only on rules you could will to be universal laws.",
+      opts:[["the imperative","and never treat a person as only a means to an end. no excuses, no exceptions - consequences don't enter into it.",1],
+            ["the loophole","unless the outcome is really good.",0],
+            ["the loophole","unless everyone else is already doing it.",0]],
+      why:"the strongest non-religious foundation for morality ever attempted - still one of the two or three live options."},
+    { who:"the exam", claim:"three frameworks walk into a bar: consequences, duty, character. which one is kant?",
+      opts:[["duty","kant is duty. utilitarianism is consequences, virtue ethics is character.",1],
+            ["consequences","kant is consequences.",0],
+            ["character","kant is character.",0]],
+      why:"most real arguments are these three talking past each other."}
+  ]},
+{ num:"viii", era:"systems and rebellion", years:"the 1800s",
+  intro:"systems get built and immediately rebelled against.",
+  rounds:[
+    { who:"hegel", claim:"reality is one big mind working itself out through history.",
+      opts:[["the engine","progress by collision: thesis meets antithesis and they fuse into a synthesis.",1],
+            ["the engine","progress by everyone agreeing really hard.",0],
+            ["the engine","progress is an illusion; history repeats.",0]],
+      why:"nobody reads hegel for fun; everybody reads the people he made possible."},
+    { who:"marx", claim:"philosophers have only interpreted the world.",
+      opts:[["the flip","the point is to change it. it's not ideas driving history - it's material conditions. who owns the factories decides what the era believes.",1],
+            ["the flip","the point is to interpret it faster.",0],
+            ["the flip","the point is to win arguments about it.",0]],
+      why:"hegel, flipped. one of the most consequential paragraphs ever written, whatever you think of the results."},
+    { who:"nietzsche", claim:"god is dead and we killed him.",
+      opts:[["the test","now build your own values or collapse into nihilism. eternal recurrence: could you live this exact life forever?",1],
+            ["the misread","so the strong should crush the weak. he said so.",0],
+            ["the misread","so nothing matters and we can all go home.",0]],
+      why:"the most written-about, most misread philosopher of the modern era. he was asking what you'd build if you stopped inheriting your values - 'good and evil' was invented by the weak to chain the strong. that's genealogy."}
+  ]},
+{ num:"ix", era:"the split", years:"the 1900s",
+  intro:"philosophy breaks into two families that barely talk to each other.",
+  rounds:[
+    { who:"young wittgenstein", claim:"language should map the world cleanly, like math. most old problems are just sloppy sentences.",
+      opts:[["older wittgenstein","wrong - mine. meaning is use. words mean what we do with them; philosophical problems are knots in grammar. dissolve the knot, don't solve it.",1],
+            ["russell","keep going, we're almost at perfect precision.",0],
+            ["the pragmatists","language maps the world, but only on weekdays.",0]],
+      why:"he overthrew his own system. language is a bag of games."},
+    { who:"sartre", claim:"existence precedes essence.",
+      opts:[["the weight","there's no human nature written in advance. you are what you do, and you're condemned to be free. bad faith is pretending you're not.",1],
+            ["the comfort","so everyone has a fixed destiny after all.",0],
+            ["the comfort","so nothing you do defines you.",0]],
+      why:"de beauvoir launches modern feminism from the same toolkit: one is not born, but becomes a woman."},
+    { who:"camus", claim:"life has no given meaning and we keep demanding one. that gap is the absurd.",
+      opts:[["the response","don't escape it - live in it. imagine sisyphus happy.",1],
+            ["the escape","so invent a meaning and pretend it was given.",0],
+            ["the escape","so stop demanding and go numb.",0]],
+      why:"the pragmatists ran a different play the same century: truth is what works, democracy is an experiment you keep running."}
+  ]},
+{ num:"x", era:"now", years:"the live fights",
+  intro:"the oldest questions with new stakes.",
+  rounds:[
+    { who:"the hard problem", claim:"why is there something it's like to be you?",
+      opts:[["the stakes","nobody has cracked it - and whether a machine could ever have it is now a question with a deadline.",1],
+            ["the handwave","easy: it's neurons, done.",0],
+            ["the handwave","easy: it's the soul, done.",0]],
+      why:"the hard problem of consciousness is the live one."},
+    { who:"rawls", claim:"design society from behind a veil of ignorance, where you don't know who you'll be in it.",
+      opts:[["nozick","any distribution is fine if it arose without force or fraud.",1],
+            ["the utilitarian","design it for maximum average pleasure.",0],
+            ["the cynic","design nothing. live in a jar.",0]],
+      why:"that argument is still the argument."},
+    { who:"the final boss", claim:"what counts as a mind? who counts as a person? what do we owe them?",
+      opts:[["the honest move","i don't know - but here's my instinct.",1],
+            ["the dodge","whatever's convenient counts.",0],
+            ["the dodge","we'll figure it out after we build it.",0]],
+      why:"intellectual honesty is the real flex. the fastest way to impress a philosopher is admitting what you don't know."}
+  ]}
+];
+
+/* ---------- engine ---------- */
+const app = document.getElementById('app');
+const SAVE_KEY = 'gauntlet-save-v1';
+let save = { unlocked: 0, best: 0, muted: false };
+try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s && typeof s.unlocked === 'number') save = Object.assign(save, s); } catch(e){}
+function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(e){} }
+
+let actx = null;
+function beep(freq, dur, type){
+  if (save.muted) return;
+  try{
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type || 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(.06, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime + dur);
+  }catch(e){}
+}
+const sfx = {
+  good(){ beep(523.25,.18); setTimeout(()=>beep(783.99,.25), 110); },
+  bad(){ beep(196,.3,'triangle'); },
+  win(){ [523.25,659.25,783.99,1046.5].forEach((f,i)=>setTimeout(()=>beep(f,.3), i*130)); }
+};
+
+let state = null; // {stage, round, hp, foeHp, foeMax, correct}
+
+function esc(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function title(){
+  app.innerHTML =
+    '<div class="center fade">' +
+      '<div class="kicker">2,500 years of people dunking on each other</div>' +
+      '<h1>the gauntlet</h1>' +
+      '<p class="sub">ten eras. every era is a fight with the one before it.<br>pick the right counter-move, or the history of thought breaks you.</p>' +
+      '<button class="btn-main" id="b-start">enter</button><br>' +
+      '<button class="btn-ghost" id="b-stages">eras</button> ' +
+      '<button class="btn-ghost" id="b-grim">grimoire</button> ' +
+      '<button class="btn-ghost" id="b-mute">' + (save.muted ? 'sound: off' : 'sound: on') + '</button>' +
+      '<div class="footnote">built from your crash course. nobody is writing in a vacuum.</div>' +
+    '</div>';
+  document.getElementById('b-start').onclick = () => startStage(Math.min(save.unlocked, STAGES.length - 1));
+  document.getElementById('b-stages').onclick = stageSelect;
+  document.getElementById('b-grim').onclick = grimoire;
+  document.getElementById('b-mute').onclick = () => { save.muted = !save.muted; persist(); title(); };
+}
+
+function stageSelect(){
+  let rows = '';
+  STAGES.forEach((s, i) => {
+    const locked = i > save.unlocked;
+    rows += '<button class="stage-btn' + (locked ? ' locked' : '') + '" data-i="' + i + '"' + (locked ? ' disabled' : '') + '>' +
+      '<span>' + s.num + '. ' + esc(s.era) + '</span><span class="st">' + esc(s.years) + (locked ? ' · locked' : '') + '</span></button>';
+  });
+  app.innerHTML =
+    '<div class="fade">' +
+      '<div class="topbar"><button id="b-back">&larr; back</button><span>choose your era</span><span></span></div>' +
+      '<div class="stages">' + rows + '</div>' +
+    '</div>';
+  document.getElementById('b-back').onclick = title;
+  app.querySelectorAll('.stage-btn:not(.locked)').forEach(b => b.onclick = () => startStage(+b.dataset.i));
+}
+
+function startStage(i){
+  state = { stage: i, round: 0, hp: 100, foeMax: STAGES[i].rounds.length, foeHp: STAGES[i].rounds.length, correct: 0 };
+  eraIntro();
+}
+
+function eraIntro(){
+  const s = STAGES[state.stage];
+  app.innerHTML =
+    '<div class="fade">' +
+      '<div class="era-num">era ' + s.num + ' · ' + esc(s.years) + '</div>' +
+      '<h2>' + esc(s.era) + '</h2>' +
+      '<p class="era-body">' + esc(s.intro) + '</p>' +
+      '<div class="center"><button class="btn-main" id="b-fight">step in</button></div>' +
+    '</div>';
+  document.getElementById('b-fight').onclick = round;
+}
+
+function shuffle(a){
+  for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function round(){
+  const s = STAGES[state.stage];
+  const r = s.rounds[state.round];
+  const opts = shuffle(r.opts.map((o, idx) => ({ tag: o[0], text: o[1], right: !!o[2], orig: idx })));
+  let optHtml = '';
+  opts.forEach((o, i) => {
+    optHtml += '<button class="opt" data-i="' + i + '"><span class="tag">' + esc(o.tag) + '</span>' + esc(o.text) + '</button>';
+  });
+  app.innerHTML =
+    '<div class="fade" id="wrap">' +
+      '<div class="topbar"><button id="b-quit">&larr; quit</button><span>era ' + s.num + ' · round ' + (state.round + 1) + '/' + s.rounds.length + '</span><span></span></div>' +
+      '<div class="hps">' +
+        '<div style="flex:1">you<div class="bar"><div id="you-fill" style="width:' + state.hp + '%"></div></div></div>' +
+        '<div style="flex:1; text-align:right">the era<div class="bar"><div id="foe-fill" style="width:' + (100 * state.foeHp / state.foeMax) + '%"></div></div></div>' +
+      '</div>' +
+      '<div class="claim"><span class="who">' + esc(r.who) + '</span>' + esc(r.claim) + '</div>' +
+      '<div class="opts">' + optHtml + '</div>' +
+      '<div class="why" id="why"></div>' +
+      '<div class="next-row" id="next-row"></div>' +
+    '</div>';
+  document.getElementById('b-quit').onclick = title;
+  app.querySelectorAll('.opt').forEach(b => b.onclick = () => pick(b, opts[+b.dataset.i], r));
+}
+
+function pick(btn, opt, r){
+  app.querySelectorAll('.opt').forEach(b => b.disabled = true);
+  const why = document.getElementById('why');
+  if (opt.right){
+    state.correct++;
+    state.foeHp--;
+    btn.classList.add('right');
+    sfx.good();
+    document.getElementById('foe-fill').style.width = (100 * state.foeHp / state.foeMax) + '%';
+    why.textContent = r.why;
+  } else {
+    state.hp = Math.max(0, state.hp - 20);
+    btn.classList.add('wrong');
+    sfx.bad();
+    const youFill = document.getElementById('you-fill');
+    youFill.style.width = state.hp + '%';
+    document.getElementById('wrap').classList.add('shake');
+    // reveal the right answer
+    app.querySelectorAll('.opt').forEach(b => {
+      const o = JSON.parse(JSON.stringify(r.opts)); // noop guard
+    });
+    why.textContent = 'countered. ' + r.why;
+  }
+  why.classList.add('show');
+  const nr = document.getElementById('next-row');
+  const dead = state.hp <= 0;
+  const cleared = state.foeHp <= 0 || state.round >= STAGES[state.stage].rounds.length - 1;
+  const btn2 = document.createElement('button');
+  btn2.className = 'btn-main';
+  if (dead){ btn2.textContent = 'the unexamined life got you'; btn2.onclick = gameOver; }
+  else if (opt.right && state.foeHp <= 0 && state.round === STAGES[state.stage].rounds.length - 1){ btn2.textContent = 'era cleared'; btn2.onclick = stageClear; }
+  else if (state.round >= STAGES[state.stage].rounds.length - 1){ btn2.textContent = 'end of era'; btn2.onclick = stageClear; }
+  else { btn2.textContent = 'next \u2192'; btn2.onclick = () => { state.round++; round(); }; }
+  nr.appendChild(btn2);
+}
+
+function gameOver(){
+  app.innerHTML =
+    '<div class="center fade">' +
+      '<div class="kicker">game over</div>' +
+      '<h2>the era wins this one</h2>' +
+      '<p class="sub">philosophy has a martyr problem. don\'t be the next one.</p>' +
+      '<button class="btn-main" id="b-retry">run it back</button><br>' +
+      '<button class="btn-ghost" id="b-home">title</button>' +
+    '</div>';
+  document.getElementById('b-retry').onclick = () => startStage(state.stage);
+  document.getElementById('b-home').onclick = title;
+}
+
+function stageClear(){
+  const s = STAGES[state.stage];
+  const total = s.rounds.length;
+  const perfect = state.correct === total;
+  if (state.stage + 1 > save.unlocked){ save.unlocked = Math.min(state.stage + 1, STAGES.length); persist(); }
+  sfx.win();
+  if (state.stage === STAGES.length - 1){ victory(); return; }
+  app.innerHTML =
+    '<div class="center fade">' +
+      '<div class="kicker">era ' + s.num + ' cleared' + (perfect ? ' · flawless' : '') + '</div>' +
+      '<h2>' + esc(s.era) + ' <span class="amber">dunked</span></h2>' +
+      '<p class="score-line">' + state.correct + '/' + total + ' counters landed · ' + state.hp + ' hp left</p>' +
+      '<button class="btn-main" id="b-next">next era &rarr;</button><br>' +
+      '<button class="btn-ghost" id="b-home">title</button>' +
+    '</div>';
+  document.getElementById('b-next').onclick = () => startStage(state.stage + 1);
+  document.getElementById('b-home').onclick = title;
+}
+
+function victory(){
+  save.unlocked = STAGES.length; persist();
+  app.innerHTML =
+    '<div class="fade">' +
+      '<div class="center">' +
+        '<div class="kicker">the whole arc</div>' +
+        '<h1>survived</h1>' +
+        '<p class="sub">two and a half thousand years of people refusing easy answers,<br>each generation dunking on the last - and you held your own.</p>' +
+      '</div>' +
+      '<div class="books">' +
+        '<div class="kicker" style="margin-top:26px">if you only read five things</div>' +
+        '<p><b>plato, apology.</b> the whole attitude of philosophy in one afternoon.</p>' +
+        '<p><b>marcus aurelius, meditations.</b> the most useful book on this list.</p>' +
+        '<p><b>tao te ching.</b> 81 tiny chapters. three a day, don\'t rush it.</p>' +
+        '<p><b>descartes, meditations.</b> modern philosophy invented in first person.</p>' +
+        '<p><b>nietzsche, on the genealogy of morals.</b> where your values actually came from.</p>' +
+        '<p><b>stretch:</b> camus, the myth of sisyphus.</p>' +
+      '</div>' +
+      '<div class="center"><button class="btn-main" id="b-home">title</button></div>' +
+    '</div>';
+  document.getElementById('b-home').onclick = title;
+}
+
+function grimoire(){
+  let html = '<div class="fade">' +
+    '<div class="topbar"><button id="b-back">&larr; back</button><span>grimoire</span><span></span></div>' +
+    '<div class="grim">';
+  STAGES.forEach(s => {
+    html += '<h3>' + s.num + ' · ' + esc(s.era) + '</h3>';
+    s.rounds.forEach(r => {
+      const right = r.opts.find(o => o[2]);
+      html += '<p><b>' + esc(r.who) + ':</b> ' + esc(r.claim) + '<br><span class="amber">' + esc(right[0]) + ':</span> ' + esc(right[1]) + '</p>';
+    });
+  });
+  html += '</div></div>';
+  app.innerHTML = html;
+  document.getElementById('b-back').onclick = title;
+}
+
+title();
+</script>
+</body>
+</html>
